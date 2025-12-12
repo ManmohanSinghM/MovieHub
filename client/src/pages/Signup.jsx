@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // Removed 'useNavigate' since it wasn't used
 import { Container, Paper, TextField, Button, Typography, Box, Alert, Grid } from '@mui/material';
-import api from '../api/axios'; // Import API helper
+import api from '../api/axios';
 
 const Signup = () => {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  // Removed 'const navigate = useNavigate();' because you use window.location.href instead
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,7 +16,6 @@ const Signup = () => {
     e.preventDefault();
     try {
       // 1. Send Register Request
-      // Default role is 'user'. To create an admin, you'd need to manually send role: 'admin'
       const response = await api.post('/auth/register', {
         username: formData.username,
         password: formData.password,
@@ -26,8 +25,7 @@ const Signup = () => {
       // 2. Auto Login (Save token)
       localStorage.setItem('token', response.data.token);
       
-      // 3. Redirect to Home
-      // Using window.location.href ensures the AuthContext refreshes immediately
+      // 3. Redirect to Home (Force refresh to update AuthContext)
       window.location.href = '/'; 
     } catch (err) {
       setError(err.response?.data?.message || 'Error creating account');

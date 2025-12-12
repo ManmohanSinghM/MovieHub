@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useCallback } from 'react';
 import api from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -13,24 +13,20 @@ const Home = () => {
   const { user, logout } = useContext(AuthContext);
   const [movies, setMovies] = useState([]);
   const [search, setSearch] = useState('');
-  
-  // Default is 'createdAt' which means "Newest Added"
   const [sort, setSort] = useState('createdAt'); 
-  
-  // PAGINATION STATE
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const fetchMovies = async () => {
+  // 1. Wrap fetchMovies in useCallback to stabilize it (Fixes infinite loops & linter errors)
+  const fetchMovies = useCallback(async () => {
     try {
-      // Pass 'page' to backend
       const { data } = await api.get(`/movies?search=${search}&sort=${sort}&page=${page}`);
       setMovies(data.movies);
-      setTotalPages(data.totalPages); // Save total pages
+      setTotalPages(data.totalPages);
     } catch (error) {
       console.error('Error fetching movies:', error);
     }
-  };
+  }, [search, sort, page]); // Re-create function only when these change
 
   const handleDelete = async (id) => {
     if (window.confirm('Delete this movie?')) {
@@ -38,15 +34,16 @@ const Home = () => {
         await api.delete(`/movies/${id}`);
         fetchMovies(); // Refresh list
       } catch (error) {
+        console.error(error);
         alert('Error deleting movie');
       }
     }
   };
 
-  // Refetch when search, sort, OR PAGE changes
+  // 2. Now we can safely list fetchMovies as a dependency
   useEffect(() => {
     fetchMovies();
-  }, [search, sort, page]);
+  }, [fetchMovies]);
 
   return (
     <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', minHeight: '100vh', pb: 5 }}>
