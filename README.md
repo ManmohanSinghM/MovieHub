@@ -1,52 +1,74 @@
 # 🎬 MERN Stack Movie Application
 
-A full-stack movie management application built with React, Node.js, MongoDB, and Redis. Features include user authentication, role-based access control (Admin/User), and a background job queue for processing movie additions.
+A full-stack movie management application built using the MERN stack with
+JWT authentication and role-based access control.
+
+---
 
 ## 🚀 Live Demo
-**Application URL:** https://mern-movie-app-six.vercel.app/
-**Backend API:** mern-movie-app-production.up.railway.app
+
+- **Frontend:** https://mern-movie-app-six.vercel.app
+- **Backend API:** https://mern-movie-app-production.up.railway.app
 
 ---
 
 ## ✨ Features
 
-- **Authentication:** Secure Login & Signup using JWT (JSON Web Tokens).
-- **RBAC (Role-Based Access Control):**
-  - **Guests:** Can view movies and search/filter.
-  - **Users:** Can view movies, pagination, and sorting.
-  - **Admins:** Can **Add** and **Delete** movies.
-- **Advanced Data Handling:**
-  - Server-side Search, Sort, and Pagination.
-  - Efficient database queries with MongoDB.
-- **Background Processing:**
-  - Uses **Redis + Bull** to handle heavy tasks (simulating a movie processing queue) asynchronously.
+### User Features
+- View movies with pagination
+- Search movies by title or description
+- Sort movies by rating, release date, and name
+
+### Admin Features
+- Add new movies
+- Delete movies
+- Role-based access using JWT
 
 ---
 
 ## 🛠 Tech Stack
 
-- **Frontend:** React (Vite), Material UI (MUI), Axios, React Router.
-- **Backend:** Node.js, Express.js.
-- **Database:** MongoDB Atlas.
-- **Queue System:** Redis Cloud, Bull.
-- **Deployment:** Vercel (Frontend), Railway (Backend).
+### Frontend
+- React (Vite)
+- Material UI
+- Axios
+- React Router
+- Context API
+
+### Backend
+- Node.js
+- Express.js
+- MongoDB Atlas
+- JWT Authentication
+
+### Deployment
+- Frontend: Vercel
+- Backend: Railway
+- Database: MongoDB Atlas
 
 ---
 
-## 🔑 Demo Credentials
+## 🔑 Demo Credentials (Admin)
 
-To test the **Admin features** (Add/Delete movies), you can log in with:
-
-- **Username:** `admin`
-- **Password:** `adminpassword123`
-
-*(Or sign up to create your own account, then update the role to 'admin' in the database).*
+- **Username:** Admin  
+- **Password:** adminpassword123  
 
 ---
 
-## 💻 Local Setup Instructions
+## 🔌 API Endpoints
 
-1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/YOUR_USERNAME/mern-movie-app.git](https://github.com/YOUR_USERNAME/mern-movie-app.git)
-   cd mern-movie-app
+| Method | Endpoint | Access |
+|------|--------|-------|
+| GET | /api/movies | Public |
+| POST | /api/movies | Admin |
+| DELETE | /api/movies/:id | Admin |
+| POST | /api/auth/login | Public |
+| POST | /api/auth/register | Public |
+
+---
+
+## 📦 Local Setup
+
+```bash
+git clone https://github.com/ManmohanSinghM/mern-movie-app.git
+cd mern-movie-app
