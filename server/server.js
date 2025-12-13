@@ -22,7 +22,7 @@ app.options('*', cors());
 
 app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 
-// app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 
 const PORT = process.env.PORT || 5000;
