@@ -1,27 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const Movie = require('../models/Movie');
-const { verifyToken, isAdmin } = require('../middleware/auth');
+// 👇 FIX: Use destructuring to match the exports in auth.js
+const { verifyToken, isAdmin } = require('../middleware/auth'); 
 
-// @desc    Add a movie
-// @route   POST /api/movies
-// @access  Admin
-router.post('/', verifyToken, isAdmin, async (req, res) => {
-  try {
-    const newMovie = new Movie(req.body);
-    await newMovie.save();
-
-    res.status(201).json({
-      message: 'Movie added successfully',
-      movie: newMovie
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// @desc    Get all movies
-// @route   GET /api/movies
+// ==========================================
+// 1. GET ALL MOVIES (Search, Sort, Pagination)
+// ==========================================
 router.get('/', async (req, res) => {
   try {
     const { page = 1, limit = 10, search = '', sort = 'createdAt' } = req.query;
@@ -51,16 +36,65 @@ router.get('/', async (req, res) => {
     res.json({
       movies,
       totalPages: Math.ceil(total / limit),
-      currentPage: page
+      currentPage: Number(page)
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// @desc    Delete a movie
-// @route   DELETE /api/movies/:id
-// @access  Admin
+// ==========================================
+// 2. SAVE TMDB MOVIE TO COLLECTION
+// ==========================================
+router.post('/save', verifyToken, async (req, res) => {
+  try {
+    const { title, description, rating, year, duration, poster, backdrop } = req.body;
+
+    // A. Check for duplicates
+    const existingMovie = await Movie.findOne({ title });
+    if (existingMovie) {
+      return res.status(409).json({ message: 'Movie already exists in your collection' });
+    }
+
+    // B. Create new movie
+    const newMovie = new Movie({
+      title,
+      description: description || "No description available",
+      rating: rating === 'N/A' ? 0 : rating,
+      year: year || '2024',
+      duration: duration === 'N/A' ? '0' : duration,
+      poster,
+      backdrop,
+      createdBy: req.user.id
+    });
+
+    const savedMovie = await newMovie.save();
+    res.status(201).json(savedMovie);
+  } catch (err) {
+    console.error("Save Error:", err); // Log error to terminal
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ==========================================
+// 3. MANUALLY ADD MOVIE (Admin Only)
+// ==========================================
+router.post('/', verifyToken, isAdmin, async (req, res) => {
+  try {
+    const newMovie = new Movie({
+      ...req.body,
+      createdBy: req.user.id
+    });
+    await newMovie.save();
+    res.status(201).json({ message: 'Movie added', movie: newMovie });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ==========================================
+// 4. DELETE MOVIE (Admin Only)
+// ==========================================
 router.delete('/:id', verifyToken, isAdmin, async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);

