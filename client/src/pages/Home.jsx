@@ -25,6 +25,7 @@ const Home = () => {
     e.target.src = `https://placehold.co/600x900/111/FFF?text=${encodeURIComponent(title || 'No Image')}`;
   };
 
+  // --- HELPER: FORMAT DURATION ---
   const formatDuration = (minutes) => {
     if (!minutes || minutes === 'N/A' || minutes === '0') return 'N/A';
     const totalMins = parseInt(minutes);
@@ -44,7 +45,6 @@ const Home = () => {
         description: movie.overview || "No description available.",
         rating: movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A',
         year: movie.release_date ? movie.release_date.split('-')[0] : 'N/A',
-        // Default to N/A initially (we fetch real duration on click)
         duration: 'N/A', 
         image: movie.poster_path 
             ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` 
@@ -56,14 +56,15 @@ const Home = () => {
       };
     }
 
-    // LOCAL MOVIE (Already has duration)
+    // LOCAL MOVIE
     return {
       id: movie._id,
       title: movie.title,
       description: movie.description,
       rating: movie.rating,
       year: movie.year || '2024',
-      duration: formatDuration(movie.duration),
+      // 👇 CHANGE 1: Keep raw number here (do NOT format yet)
+      duration: movie.duration, 
       image: movie.poster || `https://placehold.co/600x900/111/FFF?text=${encodeURIComponent(movie.title)}`, 
       backdrop: movie.backdrop || null,
       isLocal: true
@@ -110,8 +111,6 @@ const Home = () => {
         const tmdbRes = await axiosTMDB.get(requests.trending);
         const random = Math.floor(Math.random() * tmdbRes.data.results.length);
         const hero = tmdbRes.data.results[random];
-        
-        // Fetch hero details to get duration if needed (optional)
         setHeroMovie(hero);
       } catch (err) { console.error('TMDB Error:', err); }
     };
@@ -134,10 +133,6 @@ const Home = () => {
         alert("Please login to save movies!");
         return;
     }
-    // We need to convert formatted duration back to minutes for storage (optional, or store as string)
-    // For simplicity, we just save the string like "2h 15m" or just pass it as is
-    // If your backend expects a number, you might want to parse it. 
-    // But since we are saving TMDB data, let's just save the duration string we have.
 
     try {
         const { data } = await api.post('/movies/save', {
@@ -145,7 +140,8 @@ const Home = () => {
             description: selectedMovie.description,
             rating: selectedMovie.rating,
             year: selectedMovie.year,
-            duration: selectedMovie.duration === 'N/A' ? '0' : selectedMovie.duration, // Save what we see
+            // 👇 This now sends the raw Number to the database because we didn't format it yet
+            duration: selectedMovie.duration === 'N/A' ? '0' : selectedMovie.duration, 
             poster: selectedMovie.image,
             backdrop: selectedMovie.backdrop
         });
@@ -161,22 +157,19 @@ const Home = () => {
     }
   };
 
-  // 👇 UPDATED: Fetch Full Details on Click
   const handleMovieClick = async (movie, source) => {
-      // 1. Show what we have immediately
       const basicData = normalizeMovie(movie, source);
       setSelectedMovie(basicData);
 
-      // 2. If it's from TMDB, fetch the specific details to get runtime
       if (source === 'tmdb') {
           try {
               const detailRes = await axiosTMDB.get(`/movie/${movie.id}?api_key=${API_KEY}&language=en-US`);
-              const runtime = detailRes.data.runtime; // Runtime in minutes
+              const runtime = detailRes.data.runtime; 
               
-              // 3. Update the modal with the real duration
               setSelectedMovie(prev => ({
                   ...prev,
-                  duration: formatDuration(runtime)
+                  // 👇 CHANGE 2: Store raw Number in state (do NOT format yet)
+                  duration: runtime 
               }));
           } catch (err) {
               console.error("Could not fetch movie details", err);
@@ -305,6 +298,12 @@ const Home = () => {
                           <p className="text-sm text-gray-400 mb-4 flex-grow line-clamp-3">
                               {normalized.description}
                           </p>
+                          {/* 👇 CHANGE 3: Apply Format ONLY in display */}
+                          <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs text-gray-500 font-medium">
+                            <span className="flex items-center gap-1">
+                                <MdAccessTime /> {formatDuration(normalized.duration)}
+                            </span>
+                          </div>
                       </div>
                     </div>
                   );
@@ -327,7 +326,7 @@ const Home = () => {
                   return (
                     <div 
                       key={normalized.id} 
-                      onClick={() => handleMovieClick(movie, 'tmdb')} // 👈 Updated Handler
+                      onClick={() => handleMovieClick(movie, 'tmdb')}
                       className="bg-[#1F1F1F] rounded-xl overflow-hidden border border-white/5 shadow-lg hover:shadow-blue-500/20 hover:border-blue-500/50 transition-all duration-300 hover:-translate-y-1 flex flex-col h-full relative group cursor-pointer"
                     >
                       <div className="h-64 overflow-hidden relative bg-black">
@@ -408,8 +407,8 @@ const Home = () => {
                         </span>
                         <span>{selectedMovie.year}</span>
                         <span className="flex items-center gap-1">
-                            {/* 👇 This will automatically update when the fetch finishes */}
-                            <MdAccessTime size={18} /> {selectedMovie.duration}
+                            {/* 👇 CHANGE 4: Apply Format ONLY in display */}
+                            <MdAccessTime size={18} /> {formatDuration(selectedMovie.duration)}
                         </span>
                     </div>
 
