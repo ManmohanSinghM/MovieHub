@@ -70,5 +70,5 @@ JWT authentication and role-based access control.
 ## 📦 Local Setup
 
 ```bash
-git clone https://github.com/ManmohanSinghM/mern-movie-app.git
-cd mern-movie-app
+git clone https://github.com/ManmohanSinghM/MovieHub.git
+cd MovieHub
