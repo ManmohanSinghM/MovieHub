@@ -1,74 +1,125 @@
-# 🎬 MERN Stack Movie Application
+# 🎬 MovieHub - Full Stack MERN Application
 
-A full-stack movie management application built using the MERN stack with
-JWT authentication and role-based access control.
+A robust full-stack movie management application built using the MERN stack (MongoDB, Express, React, Node.js). It features secure JWT authentication, role-based access control (RBAC), and a responsive UI.
+
+---
+
+## 🏗 Infrastructure Evolution (The Migration Story)
+
+**Version 1.0 (PaaS Deployment)**
+Initially, this application followed a standard distributed deployment:
+* **Frontend:** Hosted on Vercel.
+* **Backend:** Hosted on Railway/Render.
+* **Challenges:** While easy to set up, this architecture introduced "Cold Start" delays on free tiers and required complex CORS configurations between different domains.
+
+**Version 2.0 (IaaS Migration - Current)**
+To gain full control over the infrastructure and improve performance, I migrated the entire application to a centralized **AWS EC2** instance.
+* **Unified Host:** Both frontend and backend now run on a single Amazon Linux 2023 server.
+* **Process Management:** Implemented **PM2** to ensure 24/7 uptime and automatic restarts.
+* **Network Engineering:** Configured **Linux iptables** to forward traffic from port 80 to 5000, eliminating the need for users to type port numbers.
+* **Security:** Secured via **AWS Security Groups**, restricting access to essential ports only.
 
 ---
 
 ## 🚀 Live Demo
 
-- **Frontend:** https://mern-movie-app-six.vercel.app
-- **Backend API:** https://mern-movie-app-production.up.railway.app
+- **Live URL:** [https://bit.ly/Movie_Hub](https://bit.ly/Movie_Hub)
+- **Direct IP:** [http://3.110.248.235/](http://3.110.248.235/)
+- **API Health Check:** [http://3.110.248.235/api/movies](http://3.110.248.235/api/movies)
 
 ---
 
 ## ✨ Features
 
-### User Features
-- View movies with pagination
-- Search movies by title or description
-- Sort movies by rating, release date, and name
+### 👤 User Features
+- **Browse Movies:** View a paginated list of movies fetched from the database.
+- **Search & Filter:** Search by title or description; sort by rating, release date, and name.
+- **Responsive UI:** Fully optimized for mobile and desktop screens.
 
-### Admin Features
-- Add new movies
-- Delete movies
-- Role-based access using JWT
+### 🛡 Admin Features
+- **Secure Authentication:** JWT-based login system.
+- **Movie Management:** Add new movies (Posters, Ratings, Descriptions) and delete existing ones.
+- **Role-Based Access:** Protected routes ensure only Admins can modify data.
 
 ---
 
 ## 🛠 Tech Stack
 
 ### Frontend
-- React (Vite)
-- Material UI
-- Axios
-- React Router
-- Context API
+- **Framework:** React.js (Vite)
+- **Styling:** Tailwind CSS
+- **State Management:** Context API
+- **HTTP Client:** Axios
 
 ### Backend
-- Node.js
-- Express.js
-- MongoDB Atlas
-- JWT Authentication
+- **Runtime:** Node.js
+- **Framework:** Express.js
+- **Database:** MongoDB Atlas
+- **Auth:** JSON Web Tokens (JWT) & Bcrypt
 
-### Deployment
-- Frontend: Vercel
-- Backend: Railway
-- Database: MongoDB Atlas
+### Cloud & Deployment
+- **Cloud Provider:** Amazon Web Services (AWS)
+- **Server:** EC2 (Amazon Linux 2023)
+- **Process Manager:** PM2
+- **Networking:** Elastic IP & IPTables
 
 ---
 
 ## 🔑 Demo Credentials (Admin)
 
-- **Username:** Admin  
-- **Password:** adminpassword123  
+Use these credentials to test the Admin features (Add/Delete movies):
+
+- **Username:** `admin`
+- **Password:** `adminpassword123`
 
 ---
 
 ## 🔌 API Endpoints
 
-| Method | Endpoint | Access |
-|------|--------|-------|
-| GET | /api/movies | Public |
-| POST | /api/movies | Admin |
-| DELETE | /api/movies/:id | Admin |
-| POST | /api/auth/login | Public |
-| POST | /api/auth/register | Public |
+| Method | Endpoint | Description | Access |
+|:-------|:---------|:------------|:-------|
+| `GET` | `/api/movies` | Fetch all movies | Public |
+| `POST` | `/api/movies` | Add a new movie | Admin |
+| `DELETE` | `/api/movies/:id` | Delete a movie | Admin |
+| `POST` | `/api/auth/login` | User login | Public |
+| `POST` | `/api/auth/register` | User registration | Public |
 
 ---
 
 ## 📦 Local Setup
 
-```bash
-git clone https://github.com/ManmohanSinghM/mern-movie-app.git
-cd mern-movie-app
+If you want to run this project locally:
+
+1. **Clone the repository**
+   ```bash
+   git clone [https://github.com/ManmohanSinghM/mern-movie-app.git](https://github.com/ManmohanSinghM/mern-movie-app.git)
+   cd mern-movie-app
+
+2. **Install Dependencies**
+# Install server dependencies
+cd server
+npm install
+
+# Install client dependencies
+cd ../client
+npm install
+
+3. **Environment Variables Create a .env file in the server folder:**
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+PORT=5000
+
+Create a .env file in the client folder:
+VITE_TMDB_API_KEY=your_tmdb_key
+VITE_BACKEND_URL=http://localhost:5000/api
+
+4. **Run the App**
+# Run Backend (from server folder)
+npm start
+
+# Run Frontend (from client folder in a new terminal)
+npm run dev
+
+
+
+

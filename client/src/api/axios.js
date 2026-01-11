@@ -21,26 +21,39 @@
 
 import axios from 'axios';
 
-// 👇 AUTOMATIC SWITCHING LOGIC
-// 1. If you run "npm run dev", it uses http://localhost:5000/api
-// 2. If you deploy to Vercel/Netlify, it uses your Railway URL automatically.
-const BASE_URL = import.meta.env.MODE === 'development' 
-  ? 'http://localhost:5000/api' 
-  : import.meta.env.VITE_BACKEND_URL; 
-
+// 1. BEST PRACTICE: Trust your .env file for the URL.
+// In local .env: VITE_BACKEND_URL=http://localhost:5000/api
+// In AWS .env:   VITE_BACKEND_URL=http://YOUR_ELASTIC_IP:5000/api
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api',
 });
 
-// Attach token automatically to every request
-api.interceptors.request.use((config) => {
-  const user = JSON.parse(localStorage.getItem('user'));
-  const token = user?.token || localStorage.getItem('token');
-  
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// 2. REQUEST INTERCEPTOR (Attach Token)
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// 3. RESPONSE INTERCEPTOR (Auto-Logout on 401)
+// This makes your app feel professional. If the token expires, 
+// it kicks the user to login instead of showing random errors.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Token expired or invalid
+      localStorage.removeItem('token');
+      // Optional: Redirect to login (window.location.href = '/login')
+      // but usually, the AuthContext updates state automatically.
+    }
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 export default api;

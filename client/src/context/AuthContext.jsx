@@ -2,6 +2,7 @@ import { createContext, useState, useEffect, useCallback } from 'react'; // 1. A
 import { jwtDecode } from 'jwt-decode';
 import api from '../api/axios';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {

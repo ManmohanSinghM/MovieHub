@@ -1,0 +1,50 @@
+name: CI/CD Deployment
+
+on:
+  push:
+    branches: [ "main" ]  # Or "master", check your branch name
+
+jobs:
+  deploy:
+    name: Deploy to AWS EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: 22
+          script: |
+            # 1. Go to project folder
+            cd ~/MovieHub
+            
+            # 2. Pull latest code from GitHub
+            git pull origin main
+            
+            # 3. Install Backend Dependencies
+            cd server
+            npm install
+            
+            # 4. Install Frontend Dependencies & Build
+            cd ../client
+            npm install
+            # Ensure the env file exists/is correct (Optional safeguard)
+            # You might need to recreate .env here if you didn't commit it (which you shouldn't)
+            # ideally, the .env already exists on the server from our previous manual setup.
+            
+            npm run build
+            
+            # 5. Move Build to Server Folder
+            rm -rf ../server/dist
+            mv dist ../server/
+            
+            # 6. Restart Application
+            pm2 restart movie-api
+            
+            echo "🚀 Deployment Successful!"

@@ -1,8 +1,8 @@
 require('dotenv').config();
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path'); // ✅ NEW: Required for file paths
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -26,34 +26,40 @@ const app = express();
 app.use(cors());
 app.options('*', cors());
 
-// 2. SECURITY HEADERS (Fixes Browser Warnings)
+// 2. SECURITY HEADERS
 app.use((req, res, next) => {
-  // Prevents MIME-sniffing (Security)
   res.setHeader("X-Content-Type-Options", "nosniff");
-  // Enforces UTF-8 (Warning fix)
-  // Note: We only set this default. JSON responses will override if needed.
   next();
 });
 
 // 3. BODY PARSER
 app.use(express.json());
 
-// ---- ROOT & HEALTH ----
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'MERN Movie App API is running',
-    health: '/health',
-    movies: '/api/movies'
-  });
-});
-
+// ---- API ROUTES (Must come BEFORE frontend) ----
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
-// ---- ROUTES ----
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
+
+
+// =========================================================
+// ✅ NEW: SERVE FRONTEND (The "dist" folder)
+// =========================================================
+
+// 1. Tell Express to use the "dist" folder for static files
+const distPath = path.join(__dirname, 'dist');
+app.use(express.static(distPath));
+
+// 2. The "Catch-All" Route
+// If a user goes to a page like /login or /collection directly,
+// send them the React app (index.html) so React can handle the routing.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+// =========================================================
+
 
 // ---- SERVER ----
 const PORT = process.env.PORT || 5000;
