@@ -10,14 +10,19 @@ A robust full-stack movie management application built using the MERN stack (Mon
 Initially, this application followed a standard distributed deployment:
 * **Frontend:** Hosted on Vercel.
 * **Backend:** Hosted on Railway/Render.
-* **Challenges:** While easy to set up, this architecture introduced "Cold Start" delays on free tiers and required complex CORS configurations between different domains.
+* **Challenges:** While easy to set up, this architecture introduced "Cold Start" delays on free tiers and required complex CORS configurations.
 
-**Version 2.0 (IaaS Migration - Current)**
-To gain full control over the infrastructure and improve performance, I migrated the entire application to a centralized **AWS EC2** instance.
-* **Unified Host:** Both frontend and backend now run on a single Amazon Linux 2023 server.
-* **Process Management:** Implemented **PM2** to ensure 24/7 uptime and automatic restarts.
-* **Network Engineering:** Configured **Linux iptables** to forward traffic from port 80 to 5000, eliminating the need for users to type port numbers.
-* **Security:** Secured via **AWS Security Groups**, restricting access to essential ports only.
+**Version 2.0 (IaaS Migration)**
+To gain full control over performance, I moved to a centralized **AWS EC2** instance.
+* **Unified Host:** Both frontend and backend run on a single Amazon Linux 2023 server.
+* **Process Management:** Implemented **PM2** for 24/7 uptime and automatic restarts.
+* **Network Engineering:** Configured **Linux iptables** to forward traffic from port 80 to 5000.
+* **Security:** Secured via **AWS Security Groups**, limiting access to essential ports only.
+
+**Version 3.0 (Automation & CI/CD - Current)** 🚀
+To eliminate manual deployments, I implemented a fully automated **CI/CD Pipeline** using **GitHub Actions**.
+* **Automation:** Any code pushed to the `main` branch is automatically detected by GitHub.
+* **Deployment:** The pipeline connects to the AWS server via SSH, pulls the latest code, installs dependencies, rebuilds the React app, and restarts the server—all in under 2 minutes.
 
 ---
 
@@ -57,9 +62,10 @@ To gain full control over the infrastructure and improve performance, I migrated
 - **Database:** MongoDB Atlas
 - **Auth:** JSON Web Tokens (JWT) & Bcrypt
 
-### Cloud & Deployment
+### Cloud & DevOps
 - **Cloud Provider:** Amazon Web Services (AWS)
 - **Server:** EC2 (Amazon Linux 2023)
+- **CI/CD:** GitHub Actions
 - **Process Manager:** PM2
 - **Networking:** Elastic IP & IPTables
 
@@ -94,7 +100,6 @@ If you want to run this project locally:
    ```bash
    git clone [https://github.com/ManmohanSinghM/mern-movie-app.git](https://github.com/ManmohanSinghM/mern-movie-app.git)
    cd mern-movie-app
-
 2. **Install Dependencies**
 # Install server dependencies
 cd server
